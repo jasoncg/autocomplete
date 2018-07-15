@@ -1,0 +1,202 @@
+README
+
+*******************************************************************************
+1. Problem Description
+*******************************************************************************
+Mobile Device Keyboard
+We are developing a keyboard autocomplete algorithm to be used in various 
+mobile devices. This algorithm will analyze the passages typed by the user 
+in order to suggest a set of candidate autocomplete words given a word 
+fragment.
+
+We need you to write the algorithm that will learn the words typed by the 
+user over time and then determine a ranked list of autocomplete candidates 
+given a word fragment (you should ignore capitalization when providing 
+suggestions). The algorithm will be trained in an online manner, meaning 
+that additional training passages can be submitted and incorporated into 
+the algorithm at the same time as the algorithm is being used to provide 
+autocomplete suggestions. Ideally, the accuracy of the algorithm will improve
+over time as more and more training passages are incorporated. Due to the 
+deployment environment for this algorithm, efficiency is critical. The data 
+structure utilized by your algorithm should be optimized for space and time. 
+We have provided a specification [1] and a sample passage [2] along with 
+example input and output and would like you to provide the implementation.
+
+[1] INTERFACE SPECIFICATION
+Candidate
+    String getWord() : returns the autocomplete candidate
+    Integer getConfidence() : returns the confidence* for the candidate
+
+AutocompleteProvider
+    List<Candidate> getWords(String fragment) : returns list of candidates ordered by confidence*
+    void train(String passage) : trains the algorithm with the provided passage
+* Confidence is the likelihood/relevance of an individual word relative to the 
+  other words being returned by the autocomplete provider. If two words are equally 
+  likely, they should have the same confidence. If one is more likely, it should 
+  have a higher confidence.
+
+[2] EXAMPLE WORDS AND THEIR EXPECTED NEXT WORDS BASED ON THE PROVIDED PASSAGES
+Train: "The third thing that I need to tell you is that this thing does not think thoroughly."
+Input: "thi" --> "thing" (2), "think" (1), "third" (1), "this" (1)
+Input: "nee" --> "need" (1)
+Input: "th" --> "that" (2), "thing" (2), "think" (1), "this" (1), "third" (1), "the" (1), "thoroughly" (1)
+
+*******************************************************************************
+2. Assumptions
+*******************************************************************************
+- Only alphabetical English characters are allowed for training.  All other 
+  characters will be stripped from the training sample.
+  
+- Candidate results are sorted first by confidence, then alphabetically.
+
+- Invalid input (such as no valid characters) is silently ignored.
+
+- Confidence is based on the number of times a word is added to the training 
+  set.
+
+- Training information is NOT saved between application runs.  Each time the 
+  program is started it begins with a blank database.
+
+*******************************************************************************
+3. Build
+*******************************************************************************
+The application was developed, compiled, and tested with Java 1.8.0_171 in 
+Eclipse IDE 4.8.0 (Photon) on Microsoft Windows 10.
+
+To build from the command line:
+$ mkdir output
+$ javac -d output -cp src ./src/autocomplete/Autocomplete.java
+
+To import into Eclipse:
+1. Go to the File menu and select the "Import" button
+2. Select "Existing Projects into Workspace" and click the "Next" button
+3. Next to "Select root directory" click the "Browse" button, and select the 
+   folder autocomplete.
+4. Ensure the project is selected in the Projects list and click the "Finish"
+   button
+
+*******************************************************************************
+4. Run
+*******************************************************************************
+Autocomplete can be run in an interactive mode.  While running, training samples 
+may be added continuously, and words can be tested "t" (invokes getWords). 
+
+To run from Eclipse:
+4.1 Load the project in an Eclipse workspace
+4.2 From the Project Explorer, right-click on the autocomplete project, select Run As, then click on Java Application 
+
+To run from the command line (after following build steps in section 3):
+$ java -cp output autocomplete.Autocomplete
+
+Sample run:
+Autocomplete Test
+r	Provide training sample
+t	Test for candidates
+p	Print whole autcomplete tree
+x	Exit program
+: r
+Training Sample:
+The third thing that I need to tell you is that this thing does not think thoroughly.
+
+Trained with [The third thing that I need to tell you is that this thing does not think thoroughly.]
+
+Autocomplete Test
+r	Provide training sample
+t	Test for candidates
+p	Print whole autcomplete tree
+x	Exit program
+: t
+Test Input:
+th
+Found 7 candidates:
+	that	2
+	thing	2
+	the	1
+	think	1
+	third	1
+	this	1
+	thoroughly	1
+
+Autocomplete Test
+r	Provide training sample
+t	Test for candidates
+p	Print whole autcomplete tree
+x	Exit program
+: x
+Exit
+
+*******************************************************************************
+5. Test
+*******************************************************************************
+5.1 Load the project in an Eclipse workspace
+5.2 From the Project Explorer, right-click on the autocomplete project, select Run As, then click on JUnit Test 
+The results will appear in the JUnit view in Eclipse.
+
+Additional tests can be added by modifying src/AutocompleteTest.java
+
+*******************************************************************************
+6. Project Organization
+*******************************************************************************
+All source files are located under /src/
+Autocomplete.java: 
+the interactive autocomplete application
+
+AutocompleteProvider.java: 
+Manages the autocomplete
+
+AutocompleteTest.java:
+Unit tests of the AutocompleteProvider implementation
+
+Candidate.java:
+As required by the specification a word/confidence pairing
+
+Node.java: 
+Used by autocomplete to store the trained data
+
+
+*******************************************************************************
+7. Explanation
+*******************************************************************************
+As training samples are added, Autocomplete builds a directed tree structure of all 
+words.  Edges linking a parent to a child node contain a letter indicating the next
+letter of a word.  
+
+Nodes may have a "candidate" word and may either have no children (leaf nodes) or
+one or more children indicating the next possible letters in the chain.
+
+Confidence is calculated based on the number of times a particular word is 
+added to the training set.
+
+For example, the following represents "to" "to" "to" "toast" "the" "the" "the" 
+"the" "the" "theme" and "themes"
+
+Edge Letter		Candidate Word	Confidence
+------------------------------------------
+t				=====NULL=====
+ o				to					3
+  a				=====NULL=====
+   s			=====NULL=====
+    t			toast				1
+ h				=====NULL=====
+  e				the					5
+   m			=====NULL=====
+    e			theme				1
+     s			themes				1
+
+The actual lookup process follows the tree one edge at a time and returns any
+nodes that are candidates.  For example, 
+getWord("to")
+would return the following candidate pairs ("candidateWord", confidence):
+[("to", 3), ("toast", 1)]
+
+Note that candidate results are sorted first by confidence value (in decreasing
+order) then by alphabetical order.
+
+The implementation attempts to minimize the number of nodes by stopping if
+a candidate exists.  For example, 
+train("supercalifragilisticexpialidocious")
+would generate the following tree:
+
+Edge Letter		Candidate Word							Confidence
+------------------------------------------------------------------
+s				supercalifragilisticexpialidocious			1
