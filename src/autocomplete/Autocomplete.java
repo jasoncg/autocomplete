@@ -26,7 +26,7 @@ public class Autocomplete {
 			System.out.println("Autocomplete Test");
 			System.out.println("r	Provide training sample");
 			System.out.println("t	Test for candidates");
-			System.out.println("p	Print whole autcomplete tree");
+			System.out.println("p	Print whole autocomplete tree");
 			System.out.println("x	Exit program");
 			System.out.print(": ");
 			

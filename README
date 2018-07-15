@@ -92,7 +92,7 @@ Sample run:
 Autocomplete Test
 r	Provide training sample
 t	Test for candidates
-p	Print whole autcomplete tree
+p	Print whole autocomplete tree
 x	Exit program
 : r
 Training Sample:
@@ -103,7 +103,7 @@ Trained with [The third thing that I need to tell you is that this thing does no
 Autocomplete Test
 r	Provide training sample
 t	Test for candidates
-p	Print whole autcomplete tree
+p	Print whole autocomplete tree
 x	Exit program
 : t
 Test Input:
@@ -120,7 +120,7 @@ Found 7 candidates:
 Autocomplete Test
 r	Provide training sample
 t	Test for candidates
-p	Print whole autcomplete tree
+p	Print whole autocomplete tree
 x	Exit program
 : x
 Exit
